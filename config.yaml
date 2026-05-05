@@ -1,0 +1,74 @@
+# 招标网历史标讯爬取配置
+# 登录页有图形验证码，程序会打开 Chrome，由你手动登录后回车继续。
+
+login_url: "https://user.zhaobiao.cn/homePageUc.do"
+history_url: "https://center.zhaobiao.cn/www/hallIndex/historyOfBidding"
+api_url: "https://center.zhaobiao.cn/www/hallIndex/hisAjax"
+
+user_name: bjldscdc
+password: Horizon2022
+
+# 2025-01-01 至今；end_date 留空表示运行当天。
+start_date: "2025-01-01"
+end_date: ""
+
+# 是否启动有界面的 Chrome。验证码登录建议 false。
+headless: false
+
+# 全文检索：all；标题检索：title；全文+附件：file。
+field: "all"
+file_search: "all"
+
+# 每个请求之间的基础等待秒数，建议不要太小，避免触发风控。
+# 列表接口 hisAjax 的请求间隔
+request_delay: 0.3
+# 每个详情页 url 的请求间隔
+detail_delay: 0.3
+# request_delay: 1.2
+# detail_delay: 0.8
+
+# 如果某个月某个组合仍然超过 100 页，会记录 warning。
+max_pages_per_query: 100
+
+# Cookie/验证失效时，暂停等待人工处理，按回车继续。
+manual_relogin_on_fail: true
+
+# 第一版：公告级别输出，不强行合并招标公告和中标公告。
+notice_types:
+  招标公告: "bidding"
+  中标公告: "succeed"
+
+provinces:
+  北京: "110000"
+  山西: "140000"
+  河南: "410000"
+  河北: "130000"
+  山东: "370000"
+  新疆: "650000"
+  天津: "120000"
+
+keywords:
+  - "营商环境"
+  - "政务服务"
+  - "热线"
+  - "新群体"
+  - "食品安全"
+  - "绩效评价"
+  - "绩效评估"
+  - "评估"
+  - "满意度"
+  - "城市管理"
+
+output_excel: "outputs/招标网_历史标讯_公告级别.xlsx"
+checkpoint_jsonl: "outputs/招标网_历史标讯_明细.jsonl"
+visited_urls_file: "outputs/visited_urls.txt"
+
+# 任务级断点。程序会按“关键词 -> 年月 -> 省份 -> 公告类型”的顺序检索，
+# 每完成一个“关键词+年月+省份+公告类型”任务就写入 completed_tasks。
+# 如果中途停止，下次会从未完成任务的当前页继续。
+progress_state_file: "outputs/progress_state.json"
+
+# 每完成多少个小任务自动导出一次 Excel。0 表示只在结束/异常退出时导出。
+auto_export_every_tasks: 100
+
+log_file: "logs/zhaobiao_history.log"
