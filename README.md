@@ -1,186 +1,349 @@
-# 招标网历史标讯爬虫使用说明
+# 政府采购公告爬虫使用说明
 
-## 1. 项目功能
+这个项目已经把 7 个省份的爬虫脚本放在同一个文件夹里。日常使用时，**只需要修改 `config.yaml` 里的关键词和时间**，然后运行对应省份的 `.py` 文件即可。
 
-本项目用于爬取招标网会员中心的“招标类历史数据查询”结果。
+\---
 
-当前第一版按“公告级别”输出，也就是：
+## 1\. 文件说明
 
-- 一条招标公告输出一行；
-- 一条中标公告输出一行；
-- 暂不强行把招标公告和中标公告合并为一个项目。
-
-后续可增加“按项目编号 + 项目名称相似度 + 招标进度链接”的二次合并功能。
-
-## 2. 当前爬取范围
-
-默认配置见 `config.yaml`：
-
-- 时间：`2025-01-01` 至运行当天；
-- 地区：北京、山西、河南、河北、山东、新疆、天津；
-- 关键词：营商环境、政务服务、热线、新群体、食品安全、绩效评价、绩效评估、评估、满意度、城市管理；
-- 信息类型：招标公告、中标公告；
-- 搜索范围：全文 `field=all`；
-- 输出：Excel。
-
-当前运行顺序已调整为：
+项目主文件夹中主要有这些文件：
 
 ```text
-关键词 -> 年月 -> 省份 -> 公告类型 -> 页码
+Spider/
+├─ config.yaml          # 只改这个：关键词、开始日期、结束日期
+├─ beijing.py           # 北京爬虫
+├─ shanxi.py            # 山西爬虫
+├─ henan.py             # 河南爬虫，需要人工输入验证码
+├─ hebei.py             # 河北爬虫
+├─ shandong.py          # 山东爬虫
+├─ tianjin.py           # 天津爬虫
+├─ xinjiang.py          # 新疆爬虫，使用后台浏览器
+├─ common\_config.py     # 自动读取 config.yaml，不需要修改
+├─ requirements.txt     # 依赖列表
+├─ setup\_codespaces.sh  # GitHub Codespaces 环境安装脚本
+└─ setup\_windows.bat    # Windows 环境安装脚本
 ```
 
-例如会先跑“营商环境 + 2025年1月 + 北京/山西/河南/河北/山东/新疆/天津”，再跑“营商环境 + 2025年2月 + 各省”，一直到当前月份后，再切换到下一个关键词。
+\---
 
-## 3. 安装依赖
+## 2\. 修改关键词和时间
 
-建议使用 Python 3.9 及以上版本。
+打开 `config.yaml`，只需要改这三处：
+
+```yaml
+keywords:
+  - 营商环境
+  # - 政务服务
+  # - 数字政府
+
+start\_date: "2025-01-01"
+end\_date: ""
+```
+
+### 2.1 修改关键词
+
+只爬一个关键词：
+
+```yaml
+keywords:
+  - 营商环境
+```
+
+爬多个关键词：
+
+```yaml
+keywords:
+  - 营商环境
+  - 政务服务
+  - 数字政府
+```
+
+注意：每个关键词前面要有 `-`，并且要和后面的文字之间保留一个空格。
+
+### 2.2 修改时间
+
+例如爬取 2025-01-01 到 2026-05-09：
+
+```yaml
+start\_date: "2025-01-01"
+end\_date: "2026-05-09"
+```
+
+如果 `end\_date` 留空：
+
+```yaml
+end\_date: ""
+```
+
+表示自动爬到运行当天。
+
+\---
+
+## 3\. 选择爬取哪个省
+
+不需要在 `config.yaml` 里选择省份。想爬哪个省，就在终端运行哪个省的脚本。
+
+例如：
+
+```bash
+python beijing.py
+```
+
+```bash
+python tianjin.py
+```
+
+```bash
+python shandong.py
+```
+
+全部脚本名称如下：
+
+|省份|运行命令|
+|-|-|
+|北京|`python beijing.py`|
+|山西|`python shanxi.py`|
+|河南|`python henan.py`|
+|河北|`python hebei.py`|
+|山东|`python shandong.py`|
+|天津|`python tianjin.py`|
+|新疆|`python xinjiang.py`|
+
+\---
+
+## 4\. 在 GitHub Codespaces 上运行
+
+### 第一步：进入项目文件夹
+
+在 Codespaces 终端输入：
+
+```bash
+cd Spider
+```
+
+如果终端已经在 `Spider` 文件夹里，就不需要再执行这一步。
+
+可以用下面命令确认当前位置：
+
+```bash
+pwd
+```
+
+看到路径最后是 `Spider` 即可。
+
+### 第二步：安装环境
+
+第一次运行前，输入：
+
+```bash
+bash setup\_codespaces.sh
+```
+
+这个命令会自动安装需要的依赖。新疆爬虫需要浏览器内核，脚本里也会自动安装。
+
+### 第三步：修改配置
+
+打开左侧文件列表中的 `config.yaml`，修改关键词和时间，保存文件。
+
+### 第四步：运行省份脚本
+
+例如运行天津：
+
+```bash
+python tianjin.py
+```
+
+运行山东：
+
+```bash
+python shandong.py
+```
+
+运行新疆：
+
+```bash
+python xinjiang.py
+```
+
+\---
+
+## 5\. 在 Windows 本地运行
+
+### 第一步：打开终端
+
+在项目文件夹空白处右键，选择“在终端中打开”或“打开 PowerShell”。
+
+### 第二步：进入项目目录
+
+如果压缩包解压后文件夹叫 `Spider`，可以输入：
+
+```powershell
+cd Spider
+```
+
+### 第三步：安装依赖
+
+第一次运行前，双击：
+
+```text
+setup\_windows.bat
+```
+
+也可以在终端输入：
+
+```powershell
+pip install -r requirements.txt
+python -m playwright install chromium
+```
+
+### 第四步：运行省份脚本
+
+例如：
+
+```powershell
+python tianjin.py
+```
+
+\---
+
+## 6\. 虚拟环境说明
+
+如果电脑已经安装了 Anaconda 或 Miniconda，建议使用单独环境。
+
+创建环境：
+
+```bash
+conda create -n spider python=3.10 -y
+```
+
+激活环境：
+
+```bash
+conda activate spider
+```
+
+安装依赖：
+
+```bash
+pip install -r requirements.txt
+python -m playwright install chromium
+```
+
+以后每次运行前，只需要先激活环境：
+
+```bash
+conda activate spider
+```
+
+再运行：
+
+```bash
+python tianjin.py
+```
+
+\---
+
+## 7\. 输出文件在哪里
+
+每个省份会生成自己的输出目录，例如：
+
+```text
+outputs\_tianjin/
+outputs\_shandong/
+outputs\_hebei/
+outputs\_henan\_auto/
+outputs\_xinjiang/
+```
+
+Excel 文件就在对应的输出目录里。
+
+\---
+
+## 8\. 特殊说明
+
+### 8.1 河南需要人工输入验证码
+
+运行 `python henan.py` 后，程序会把验证码图片保存到：
+
+```text
+outputs\_henan\_auto/captcha/
+```
+
+打开最新的验证码图片，把验证码输入到终端里即可。
+
+### 8.2 新疆使用后台浏览器
+
+新疆站点有反爬校验，所以 `xinjiang.py` 使用 Playwright 后台浏览器。第一次运行前必须安装浏览器内核：
+
+```bash
+python -m playwright install chromium
+```
+
+在 Codespaces 中建议执行：
+
+```bash
+python -m playwright install --with-deps chromium
+```
+
+本项目里的 `setup\_codespaces.sh` 已经包含这一步。
+
+\---
+
+## 9\. 常见问题
+
+### 问题 1：提示找不到某个 Python 包
+
+例如：
+
+```text
+ModuleNotFoundError: No module named 'xxx'
+```
+
+解决：
 
 ```bash
 pip install -r requirements.txt
 ```
 
-如果 Selenium 启动 Chrome 报错，请更新 Chrome 浏览器和 selenium：
+### 问题 2：新疆提示浏览器不存在
+
+解决：
 
 ```bash
-pip install -U selenium
+python -m playwright install chromium
 ```
 
-Selenium 4.6+ 通常会自动管理 ChromeDriver，不需要手动下载驱动。
+### 问题 3：没有爬到数据
 
-## 4. 运行方式
+请检查：
 
-在项目目录下运行：
+1. `config.yaml` 的关键词是否正确；
+2. 日期范围是否正确；
+3. 网站本身是否能打开；
+4. 是否已经抓过同样的数据，部分脚本会跳过已访问链接。
+
+可以先换一个宽泛关键词测试，例如：
+
+```yaml
+keywords:
+  - 环境
+```
+
+\---
+
+## 10\. 最常用操作总结
+
+日常只做三步：
+
+```text
+1. 修改 config.yaml
+2. 打开终端进入 Spider 文件夹
+3. 输入 python 省份.py
+```
+
+例如：
 
 ```bash
-python run_zhaobiao_history.py
+python tianjin.py
 ```
 
-Windows 也可以双击或运行：
-
-```bash
-run_windows.bat
-```
-
-程序会自动打开 Chrome。你需要在浏览器里手动完成登录和图形验证码。
-
-登录成功后，建议进入一次：
-
-```text
-https://center.zhaobiao.cn/www/hallIndex/historyOfBidding
-```
-
-然后回到终端按回车，程序会自动读取 Cookie 并开始爬取。
-
-## 5. 输出文件
-
-默认输出在 `outputs/` 目录：
-
-```text
-outputs/招标网_历史标讯_公告级别.xlsx
-outputs/招标网_历史标讯_明细.jsonl
-outputs/visited_urls.txt
-outputs/progress_state.json
-```
-
-其中：
-
-- Excel 是最终结果；
-- JSONL 是已保存的明细结果，程序中断后仍可保留已爬数据；
-- visited_urls.txt 用于详情页去重，避免重复写入；
-- progress_state.json 用于任务级断点，记录已完成的“关键词+年月+省份+公告类型”和当前未完成页码。
-
-## 6. Excel 字段
-
-输出字段包括：
-
-```text
-检索关键词
-检索省份
-检索省份代码
-检索年份
-检索月份
-公告类型
-公告类型代码
-项目名称
-项目编号
-招标单位/采购人
-中标单位/成交供应商
-采购形式/采购方式
-代理机构
-时间/发布时间
-金额
-链接
-来源地区
-原始标题
-公告ID
-公告encId
-正文摘要
-解析状态
-错误信息
-```
-
-## 7. Cookie 失效或人工验证
-
-如果爬取过程中 Cookie 失效、网站要求重新验证，程序会暂停并提示：
-
-```text
-检测到请求失败、Cookie 失效或需要人工验证。
-请在已打开的浏览器中重新登录/完成验证，并进入历史数据查询页面。
-处理完成后按回车继续...
-```
-
-此时你只需要在浏览器里处理完验证，然后回到终端按回车。
-
-
-## 8. 断点续爬说明
-
-本版本新增任务级断点。程序会按照以下顺序检索：
-
-```text
-关键词 -> 年月 -> 省份 -> 公告类型 -> 页码
-```
-
-每完成一个小任务：
-
-```text
-关键词 + 年份 + 月份 + 省份 + 公告类型
-```
-
-程序都会写入 `outputs/progress_state.json`。如果中途停止，下次重新运行时会：
-
-1. 自动读取 `progress_state.json`；
-2. 跳过已经完成的小任务；
-3. 如果上次停在某个任务的某一页，会从该页继续；
-4. 已经保存过的详情页会根据 `visited_urls.txt` 自动跳过。
-
-也就是说，如果已经完成“营商环境 + 2025年1月 + 北京/山西/河南”，下次会继续从“营商环境 + 2025年1月 + 河北”附近继续，而不是从头重爬。
-
-如果确实想全部从头重爬，请先备份并删除 `outputs/` 目录里的这些文件：
-
-```text
-progress_state.json
-visited_urls.txt
-招标网_历史标讯_明细.jsonl
-招标网_历史标讯_公告级别.xlsx
-```
-
-## 9. 重要说明
-
-1. 本项目不会自动识别图形验证码，需要人工输入。
-2. 不建议把账号密码写入代码。
-3. 本项目默认不写入 MySQL，只导出 Excel。
-4. 搜索范围为全文，所以结果可能包含噪声，例如地址中出现“政务服务中心”的项目也可能被检索到。
-5. 某些关键词、地区、月份组合如果结果仍超过 100 页，程序会记录 warning，后续可继续细拆条件。
-
-## 10. 后续建议改进
-
-后续可以继续增强：
-
-1. 招标公告和中标公告项目级合并：
-   - 优先用项目编号；
-   - 再用项目名称相似度；
-   - 再用详情页“招标进度”里的关联链接。
-2. 增加 GUI 按钮，接入原 PyQt5 界面。
-3. 增加字段人工复核列。
-4. 增加“标题搜索”和“全文搜索”两套结果对比。
-5. 增加按天拆分逻辑，应对某些月份仍超过 100 页的情况。
