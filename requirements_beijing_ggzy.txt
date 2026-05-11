@@ -1,7 +1,0 @@
-requests
-beautifulsoup4
-lxml
-pandas
-openpyxl
-pyyaml
-curl_cffi
